@@ -84,16 +84,17 @@
             port: config.port,
             password: config.password
         });
-        this._addHandlers();
+        this._addHandlers(config.callback);
         this._initEventListeners();
     };
 
-    Client.prototype._addHandlers = function () {
+    Client.prototype._addHandlers = function (callback) {
         var that = this;
         this._socket.on('init', function (config) {
             var canvas = that._screen.getCanvas();
             canvas.width = config.width;
             canvas.height = config.height;
+            if (typeof callback === 'function') callback();
         });
         this._socket.on('frame', function (frame) {
             that._screen.drawRect(frame);
@@ -102,7 +103,6 @@
 
 
     document.getElementById('loginBtn').addEventListener('click', function () {
-        document.getElementById('authentication-table').style.display = 'none';
         var screen = new Screen(document.getElementById('screen')),
             client = new Client(screen);
 
@@ -110,6 +110,9 @@
             host: document.getElementById('host').value,
             port: parseInt(document.getElementById('port').value, 10),
             password: document.getElementById('password').value,
+            callback: function () {
+                document.getElementById('form-wrapper').classList.add('form-wrapper-hidden');
+            }
         });
     }, false);
 

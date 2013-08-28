@@ -36,6 +36,7 @@ socketio.sockets.on('connection', function (socket) {
 
             var image = new Png(rgb, r.width, r.height, 'rgb');
             image = image.encodeSync();
+
             socket.emit('frame', {
                 x: rect.x,
                 y: rect.y,

@@ -2,30 +2,36 @@
 <html>
     <head>
         <link rel="stylesheet" href="./css/bootstrap.min.css" />
+        <link rel="stylesheet" href="./css/styles.css" />
     </head>
     <body>
-        <table class="table" style="width: 300px;" id="authentication-table">
-            <tr>
-                <td>
-                    <label for="host">Host:</label><input type="text" id="host" name="host" value="192.168.100.6" /><br />
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <label for="port">Port:</label><input type="text" id="port" name="port" value="5900" /><br />
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <label for="password">Password:</label><input type="password" id="password" name="password" value="paralaks" /><br />
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <button class="btn" id="loginBtn">Log in</button>
-                </td>
-            </tr>
-        </table>
+        <div class="form-wrapper" id="form-wrapper">
+            <form class="form-horizontal" onsubmit="return false">
+              <div class="control-group">
+                <label class="control-label" for="host">Host:</label>
+                <div class="controls">
+                  <input type="text" id="host" name="host" value="192.168.100.6" /><br />
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="port">Port:</label>
+                <div class="controls">
+                  <input type="text" id="port" name="port" value="5900" /><br />
+                </div>
+              </div>
+              <div class="control-group">
+                <label class="control-label" for="port">Port:</label>
+                <div class="controls">
+                  <input type="password" id="password" name="password" value="paralaks" /><br />
+                </div>
+              </div>
+              <div class="control-group">
+                <div class="controls">
+                  <button class="btn" id="loginBtn">Log in</button>
+                </div>
+              </div>
+            </form>
+        </div>
         <canvas id="screen">
         </canvas>
         <script src="http://localhost:8091/socket.io/socket.io.js"></script>
