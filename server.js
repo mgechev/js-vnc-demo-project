@@ -39,7 +39,6 @@ function handleFrame(socket, rect, r) {
     rgb[offset++] = rect.data[i + 1];
     rgb[offset++] = rect.data[i];
   }
-
   var image = new Png(rgb, r.width, r.height, 'rgb');
   image = image.encodeSync();
   socket.emit('frame', {
