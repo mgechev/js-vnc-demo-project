@@ -6,7 +6,6 @@
     "url": "http://github.com/mgechev/js-vnc"
   },
   "dependencies": {
-    "rfb2": "https://github.com/mgechev/node-rfb2/tarball/master",
     "socket.io": "~0.9.16",
     "connect": "~2.8.5"
   }
