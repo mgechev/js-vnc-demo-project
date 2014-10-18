@@ -1,0 +1,41 @@
+.form-wrapper {
+    -webkit-transition: all 1s;
+    -moz-transition: all 1s;
+    transition: all 1s;
+    -webkit-backface-visibility: hidden;
+    -moz-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-transform-origin: center center;
+    -moz-transform-origin: center center;
+    transform-origin: center center;
+    width: 320px;
+    margin: auto;
+    margin-top: 100px;
+    display: block;
+    opacity: 1;
+}
+
+.form-wrapper-hidden {
+    -webkit-transform: rotateZ(190deg) scale(7);
+    -moz-transform: rotateZ(190deg);
+    transform: rotateZ(190deg);
+    opacity: 0;
+}
+
+.form-wrapper .form-horizontal .controls {
+    margin-left: 90px;
+}
+
+.form-wrapper .form-horizontal .control-label {
+    width: auto;
+}
+
+#screen {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    -webkit-transition: opacity 1s;
+    -moz-transition: opacity 1s;
+    transition: opacity 1s;
+    opacity: 0;
+}
