@@ -6,7 +6,8 @@
     "url": "http://github.com/mgechev/js-vnc"
   },
   "dependencies": {
-    "socket.io": "~0.9.16",
-    "connect": "~2.8.5"
+    "connect": "~2.8.5",
+    "rfb2": "0.0.10",
+    "socket.io": "~0.9.16"
   }
 }
