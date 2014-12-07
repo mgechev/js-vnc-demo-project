@@ -1,5 +1,7 @@
 var rfb = require('rfb2'),
-  socketio = require('socket.io').listen(8091, { log: false }),
+  port = 8090,
+  socketIoPort = 8091,
+  socketio = require('socket.io').listen(socketIoPort, { log: false }),
   Png = require('./node_modules/node-png/build/Release/png').Png,
   connect = require('connect'),
   clients = [];
@@ -27,6 +29,7 @@ function addEventHandlers(r, socket) {
   });
   r.on('rect', function (rect) {
     handleFrame(socket, rect, r);
+    r.requestUpdate(false, 0, 0, r.width, r.height);
   });
 }
 
@@ -61,7 +64,7 @@ function disconnectClient(socket) {
   });
 }
 
-connect.createServer(connect.static('./static')).listen(8090);
+connect.createServer(connect.static('./static')).listen(port);
 
 socketio.sockets.on('connection', function (socket) {
   socket.on('init', function (config) {
@@ -77,3 +80,6 @@ socketio.sockets.on('connection', function (socket) {
     });
   });
 });
+
+console.log('Listening on port', port);
+console.log('SocketIO listening on port', socketIoPort);

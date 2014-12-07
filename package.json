@@ -7,7 +7,8 @@
   },
   "dependencies": {
     "connect": "~2.8.5",
-    "rfb2": "0.0.10",
+    "express": "^4.10.4",
+    "rfb": "^0.2.3",
     "socket.io": "~0.9.16"
   }
 }
