@@ -1,85 +1,128 @@
-var rfb = require('rfb'),
-  port = 8090,
-  socketIoPort = 8091,
-  socketio = require('socket.io').listen(socketIoPort, { log: false }),
-  Png = require('./node_modules/node-png/build/Release/png').Png,
-  connect = require('connect'),
-  clients = [];
+var RFB = require('rfb'),
+    io = require('socket.io'),
+    Png = require('./node_modules/node-png/build/Release/png').Png,
+    express = require('express'),
+    http = require('http'),
+    clients = [],
+    Config = {
+      HTTP_PORT: 8090
+    };
 
 function createRfbConnection(config, socket) {
-  var r = rfb.createConnection({
-    host: config.host,
-    port: config.port,
-    password: config.password
-  });
+  try {
+    var r = RFB({
+      host: config.host,
+      port: config.port,
+      password: config.password,
+      securityType: 'vnc',
+    });
+  } catch (e) {
+    console.log(e);
+  }
   addEventHandlers(r, socket);
   return r;
 }
 
 function addEventHandlers(r, socket) {
-  r.on('connect', function () {
+  var initialized = false,
+      screenWidth, screenHeight;
+
+  function handleConnection(width, height) {
+    screenWidth = width;
+    screenHeight = height;
+    console.info('RFB connection established');
     socket.emit('init', {
-      width: r.width,
-      height: r.height
+      width: width,
+      height: height
     });
     clients.push({
       socket: socket,
-      rfb: r
+      rfb: r,
+      interval: setInterval(function () {
+        r.requestRedraw();
+      }, 1000)
+    });
+    r.requestRedraw();
+    initialized = true;
+  }
+
+  r.on('error', function (e) {
+    console.error('Error while talking with the remote RFB server', e);
+  });
+
+  r.on('raw', function (rect) {
+    !initialized && handleConnection(rect.width, rect.height);
+    socket.emit('frame', {
+      x: rect.x,
+      y: rect.y,
+      width: rect.width,
+      height: rect.height,
+      image: encodeFrame(rect).toString('base64')
+    });
+    r.requestUpdate({
+      x: 0,
+      y: 0,
+      subscribe: 1,
+      width: screenWidth,
+      height: screenHeight
     });
   });
-  r.on('rect', function (rect) {
-    handleFrame(socket, rect, r);
-    r.requestUpdate(false, 0, 0, r.width, r.height);
+
+  r.on('*', function () {
+    console.error(arguments);
   });
 }
 
-function handleFrame(socket, rect, r) {
+function encodeFrame(rect) {
   var rgb = new Buffer(rect.width * rect.height * 3, 'binary'),
-    offset = 0;
+      offset = 0;
 
-  for (var i = 0; i < rect.data.length; i += 4) {
-    rgb[offset++] = rect.data[i + 2];
-    rgb[offset++] = rect.data[i + 1];
-    rgb[offset++] = rect.data[i];
+  for (var i = 0; i < rect.fb.length; i += 4) {
+    rgb[offset++] = rect.fb[i + 2];
+    rgb[offset++] = rect.fb[i + 1];
+    rgb[offset++] = rect.fb[i];
   }
-  var image = new Png(rgb, r.width, r.height, 'rgb');
-  image = image.encodeSync();
-  socket.emit('frame', {
-    x: rect.x,
-    y: rect.y,
-    width: rect.width,
-    height: rect.height,
-    image: image.toString('base64')
-  });
+  var image = new Png(rgb, rect.width, rect.height, 'rgb');
+  return image.encodeSync();
 }
 
 function disconnectClient(socket) {
-  clients.forEach(function (pair) {
-    if (pair.socket === socket) {
-      pair.rfb.end();
+  clients.forEach(function (client) {
+    if (client.socket === socket) {
+      client.rfb.end();
+      clearInterval(client.interval);
     }
   });
-  clients = clients.filter(function (pair) {
-    return pair.socket === socket;
+  clients = clients.filter(function (client) {
+    return client.socket === socket;
   });
 }
 
-connect.createServer(connect.static('./static')).listen(port);
+(function () {
+  var app = express(),
+      server = http.createServer(app);
 
-socketio.sockets.on('connection', function (socket) {
-  socket.on('init', function (config) {
-    var r = createRfbConnection(config, socket);
-    socket.on('mouse', function (evnt) {
-      r.pointerEvent(evnt.x, evnt.y, evnt.button);
-    });
-    socket.on('keyboard', function (evnt) {
-      r.keyEvent(evnt.keyCode, evnt.isDown);
-    });
-    socket.on('disconnect', function () {
-      disconnectClient(socket);
+  app.use(express.static(__dirname + '/static/'));
+  server.listen(Config.HTTP_PORT);
+
+  console.log('Listening on port', Config.HTTP_PORT);
+
+  io = io.listen(server, { log: false });
+  io.sockets.on('connection', function (socket) {
+    console.info('Client connected');
+    socket.on('init', function (config) {
+      var r = createRfbConnection(config, socket);
+      socket.on('mouse', function (evnt) {
+        r.sendPointer(evnt.x, evnt.y, evnt.button);
+      });
+      socket.on('keyboard', function (evnt) {
+        r.sendKey(evnt.keyCode, evnt.isDown);
+        console.info('Keyboard input')
+      });
+      socket.on('disconnect', function () {
+        disconnectClient(socket);
+        console.info('Client disconnected')
+      });
     });
   });
-});
-
-console.log('Listening on port', port);
-console.log('SocketIO listening on port', socketIoPort);
+}());
