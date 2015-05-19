@@ -1,4 +1,4 @@
-var rfb = require('rfb2'),
+var rfb = require('rfb'),
   port = 8090,
   socketIoPort = 8091,
   socketio = require('socket.io').listen(socketIoPort, { log: false }),
