@@ -16,6 +16,7 @@ function createRfbConnection(config, socket) {
       password: config.password,
       securityType: 'vnc',
     });
+    r.requestRedraw();
   } catch (e) {
     console.log(e);
   }
@@ -51,7 +52,6 @@ function addEventHandlers(r, socket) {
   });
 
   r.on('raw', function (rect) {
-    console.log('42424242');
     !initialized && handleConnection(rect.width, rect.height);
     socket.emit('frame', {
       x: rect.x,
