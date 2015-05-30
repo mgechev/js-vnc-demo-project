@@ -42,8 +42,14 @@ function addEventHandlers(r, socket) {
       socket: socket,
       rfb: r,
       interval: setInterval(function () {
-        r.requestRedraw();
-      }, 1000)
+        r.requestUpdate({
+          x: 0,
+          y: 0,
+          width: width,
+          height: height,
+          subscribe: 1
+        });
+      }, 50)
     });
     r.requestRedraw();
     initialized = true;
