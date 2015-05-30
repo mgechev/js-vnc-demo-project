@@ -16,7 +16,9 @@ function createRfbConnection(config, socket) {
       password: config.password,
       securityType: 'vnc',
     });
-    r.requestRedraw();
+    setTimeout(function () {
+      r.requestRedraw();
+    }, 200);
   } catch (e) {
     console.log(e);
   }
