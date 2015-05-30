@@ -1,31 +1,35 @@
 'use strict';
 
-var RFB = require('rfb'),
-    io = require('socket.io'),
-    Png = require('./node_modules/node-png/build/Release/png').Png,
-    express = require('express'),
-    http = require('http'),
-    clients = [],
-    Config = {
-      HTTP_PORT: 8090
-    };
+var RFB = require('rfb');
+var io = require('socket.io');
+var Png = require('./node_modules/node-png/build/Release/png').Png;
+var express = require('express');
+var http = require('http');
+var clients = [];
+var Config = {
+   HTTP_PORT: 8090
+ };
 
 function encodeFrame(rect) {
-  var rgb = new Buffer(rect.width * rect.height * 3, 'binary'),
-      offset = 0;
+  var rgb = new Buffer(rect.width * rect.height * 3, 'binary');
+  var offset = 0;
 
   for (var i = 0; i < rect.fb.length; i += 4) {
-    rgb[offset++] = rect.fb[i + 2];
-    rgb[offset++] = rect.fb[i + 1];
-    rgb[offset++] = rect.fb[i];
+    rgb[offset] = rect.fb[i + 2];
+    offset += 1;
+    rgb[offset] = rect.fb[i + 1];
+    offset += 1;
+    rgb[offset] = rect.fb[i];
+    offset += 1;
   }
   var image = new Png(rgb, rect.width, rect.height, 'rgb');
   return image.encodeSync();
 }
 
 function addEventHandlers(r, socket) {
-  var initialized = false,
-      screenWidth, screenHeight;
+  var initialized = false;
+  var screenWidth;
+  var screenHeight;
 
   function handleConnection(width, height) {
     screenWidth = width;
@@ -57,7 +61,9 @@ function addEventHandlers(r, socket) {
   });
 
   r.on('raw', function (rect) {
-    !initialized && handleConnection(rect.width, rect.height);
+    if (!initialized) {
+      handleConnection(rect.width, rect.height);
+    }
     socket.emit('frame', {
       x: rect.x,
       y: rect.y,
@@ -78,7 +84,6 @@ function addEventHandlers(r, socket) {
     console.error(arguments);
   });
 }
-
 
 function createRfbConnection(config, socket) {
   var r;
@@ -112,8 +117,8 @@ function disconnectClient(socket) {
 }
 
 (function () {
-  var app = express(),
-      server = http.createServer(app);
+  var app = express();
+  var server = http.createServer(app);
 
   app.use(express.static(__dirname + '/static/'));
   server.listen(Config.HTTP_PORT);
