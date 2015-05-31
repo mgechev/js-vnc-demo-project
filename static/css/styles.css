@@ -34,10 +34,6 @@
   -webkit-transition: opacity 1s;
   -moz-transition: opacity 1s;
   transition: opacity 1s;
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  opacity: 0;
   -webkit-transform-origin: 0 0;
   -moz-transform-origin: 0 0;
   transform-origin: 0 0;

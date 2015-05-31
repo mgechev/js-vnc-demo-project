@@ -389,31 +389,39 @@
 
   Screen.prototype.addMouseHandler = function (cb) {
     var state = 0;
-    this._canvas.addEventListener('mousedown', function (e) {
+    this._canvas.addEventListener('mousedown', this._onmousedown = function (e) {
       state = 1;
       cb.call(null, e.pageX, e.pageY, state);
       e.preventDefault();
     }, false);
-    this._canvas.addEventListener('mouseup', function (e) {
+    this._canvas.addEventListener('mouseup', this._onmouseup = function (e) {
       state = 0;
       cb.call(null, e.pageX, e.pageY, state);
       e.preventDefault();
     }, false);
-    this._canvas.addEventListener('mousemove', function (e) {
+    this._canvas.addEventListener('mousemove', this._onmousemove = function (e) {
       cb.call(null, e.pageX, e.pageY, state);
       e.preventDefault();
     });
   };
 
   Screen.prototype.addKeyboardHandlers = function (cb) {
-    document.addEventListener('keydown', function (e) {
+    document.addEventListener('keydown', this._onkeydown = function (e) {
       cb.call(null, e.keyCode, e.shiftKey, 1);
       e.preventDefault();
     }, false);
-    document.addEventListener('keydown', function (e) {
+    document.addEventListener('keyup', this._onkeyup = function (e) {
       cb.call(null, e.keyCode, e.shiftKey, 0);
       e.preventDefault();
     }, false);
+  };
+
+  Screen.prototype.removeHandlers = function () {
+    document.removeEventListener('keydown', this._onkeydown);
+    document.removeEventListener('keyup', this._onkeyup);
+    this._canvas.removeEventListener('mouseup', this._onmouseup);
+    this._canvas.removeEventListener('mousedown', this._onmousedown);
+    this._canvas.removeEventListener('mousemove', this._onmousemove);
   };
 
   Screen.prototype.getCanvas = function () {
@@ -493,21 +501,32 @@
     return null;
   };
 
-  document.getElementById('loginBtn').addEventListener('click', function () {
+  Client.prototype._removeHandlers = function () {
+  };
+
+  Client.prototype.disconnect = function () {
+    this._socket.disconnect();
+    this._screen.removeHandlers();
+  };
+
+  var client;
+  document.getElementById('disconnect-btn').addEventListener('click', function () {
+    client.disconnect();
+    document.getElementById('screen-wrapper').style.display = 'none';
+    document.getElementById('form-wrapper').style.display = 'block';
+  });
+
+  document.getElementById('login-btn').addEventListener('click', function () {
     var canvas = document.getElementById('screen');
     var screen = new Screen(canvas);
-    var client = new Client(screen);
+    client = new Client(screen);
     client.connect({
       host: document.getElementById('host').value,
       port: parseInt(document.getElementById('port').value, 10),
       password: document.getElementById('password').value,
       init: function () {
-        var form = document.getElementById('form-wrapper');
-        form.classList.add('form-wrapper-hidden');
-        canvas.style.opacity = 1;
-        form.addEventListener('transitionend', function () {
-          form.style.display = 'none';
-        });
+        document.getElementById('form-wrapper').style.display = 'none';
+        document.getElementById('screen-wrapper').style.display = 'block';
       }
     });
   }, false);

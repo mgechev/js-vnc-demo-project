@@ -6,7 +6,7 @@
     </head>
     <body>
         <div class="form-wrapper" id="form-wrapper">
-            <form class="form-horizontal" onsubmit="return false">
+            <form class="form-horizontal" action="post" onsubmit="return false">
               <div class="control-group">
                 <label class="control-label" for="host">Host:</label>
                 <div class="controls">
@@ -27,13 +27,16 @@
               </div>
               <div class="control-group">
                 <div class="controls">
-                  <button class="btn" id="loginBtn">Log in</button>
+                  <button class="btn" id="login-btn">Log in</button>
                 </div>
               </div>
             </form>
         </div>
-        <canvas id="screen">
-        </canvas>
+        <div id="screen-wrapper" style="display: none;">
+          <button id="disconnect-btn">Disconnect</button>
+          <canvas id="screen">
+          </canvas>
+        </div>
         <script src="http://localhost:8090/socket.io/socket.io.js"></script>
         <script src="./js/client.js"></script>
     </body>
