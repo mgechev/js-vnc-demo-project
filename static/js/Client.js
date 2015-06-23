@@ -429,8 +429,8 @@
   };
 
   Client.prototype._scaleScreen = function (config) {
-    var sw = screen.availWidth / config.width;
-    var sh = screen.availHeight / config.height;
+    var sw = (screen.availWidth * 0.7) / config.width;
+    var sh = (screen.availHeight * 0.7) / config.height;
     var s = Math.min(sw, sh);
     this._scaleFactor = s;
     var canvas = this._screen.getCanvas();
