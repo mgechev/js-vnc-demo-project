@@ -444,7 +444,7 @@
     code = code.toString();
     var keys = keyMap[code];
     if (keys) {
-      return keys[shift ? 2 : 1];
+      return keys[shift ? 1 : 0];
     }
     return null;
   };
